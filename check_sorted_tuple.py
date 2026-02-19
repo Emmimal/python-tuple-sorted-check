@@ -2,6 +2,7 @@
 # Complete code collection from https://emitechlogic.com/check-if-a-tuple-is-sorted-in-python/
 # Author: Emmimal Alexander
 # Date: February 19, 2026
+# Updated: Fixed tuple formatting error in print statements
 
 from itertools import pairwise
 import operator
@@ -47,7 +48,7 @@ def is_sorted_pairwise(t, strict=False):
     return all(op(x, y) for x, y in pairwise(t))
 
 
-# Polyfill for Python < 3.10 (from article)
+# Polyfill for Python < 3.10
 def pairwise_polyfill(iterable):
     it = iter(iterable)
     a = next(it, None)
@@ -91,7 +92,7 @@ def is_sorted_by_key(t, key_func, strict=False):
     return all(op(key_func(x), key_func(y)) for x, y in zip(t, t[1:]))
 
 
-# Example usage with itemgetter
+# Example convenience function
 def is_sorted_by_salary(records):
     return is_sorted_by_key(records, operator.itemgetter(2))  # salary at index 2
 
@@ -111,23 +112,27 @@ def is_sorted_safe(t, strict=False):
 # ────────────────────────────────────────────────
 if __name__ == "__main__":
     tests = [
-        (1, 2, 3, 4, 5),            # True
-        (1, 3, 2, 4),               # False
-        (5, 5, 5),                  # True (non-decreasing)
-        (1, 2, 2, 3),               # True (non-decreasing), False (strict)
-        (),                         # True
-        (7,),                       # True
-        (10, 8, 8, 5, 2),           # True non-increasing
-        (10, 8, 5, 2),              # True strictly decreasing
+        (1, 2, 3, 4, 5),
+        (1, 3, 2, 4),
+        (5, 5, 5),
+        (1, 2, 2, 3),
+        (),
+        (7,),
+        (10, 8, 8, 5, 2),
+        (10, 8, 5, 2),
     ]
 
     print("Testing non-decreasing checks:")
     for t in tests:
-        print(f"{t:20} → {is_sorted_zip(t)}")
+        print(f"{str(t):<35} → {is_sorted_zip(t)}")
 
     print("\nTesting strictly increasing:")
     for t in tests:
-        print(f"{t:20} → {is_sorted_zip(t, strict=True)}")
+        print(f"{str(t):<35} → {is_sorted_zip(t, strict=True)}")
+
+    print("\nTesting non-increasing (descending with equals):")
+    print(f"{str((10, 8, 8, 5, 2)):<35} → {is_non_increasing((10, 8, 8, 5, 2))}")
+    print(f"{str((10, 8, 5, 2)):<35} → {is_non_increasing((10, 8, 5, 2))}")
 
     # Key-based example
     records = (
@@ -135,12 +140,12 @@ if __name__ == "__main__":
         ("Bob",   34, 85000),
         ("Priya", 31, 91000),
     )
-    print("\nSorted by salary:", is_sorted_by_salary(records))  # True
+    print("\nRecords sorted by salary:", is_sorted_by_salary(records))  # True
 
-    # Benchmark example (large mostly-sorted tuple)
-    print("\nRunning quick benchmark (large tuple)...")
+    # Benchmark example (large mostly-sorted tuple with one violation)
+    print("\nRunning quick benchmark (1 million elements)...")
     base = list(range(1_000_000))
-    base[500_000] = 0  # one violation in the middle
+    base[500_000] = 0  # violation in the middle → early exit for good methods
     t_large = tuple(base)
 
     print("zip method:   ", timeit.timeit(lambda: is_sorted_zip(t_large), number=3))
